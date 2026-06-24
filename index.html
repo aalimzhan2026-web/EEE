@@ -9,3 +9,979 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252e42;--border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);--text:#e8ecf4;--text2:#8b96b0;--text3:#5a6480;--accent:#3b7cf6;--accent-dim:rgba(59,124,246,0.15);--red:#e84c4c;--red-dim:rgba(232,76,76,0.12);--amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);--green:#34c97f;--green-dim:rgba(52,201,127,0.12);--purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);--r:10px;--rs:6px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.layout{display:grid;grid-template-columns:240px 1fr;flex:1;overflow:hidden;height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.logo{padding:18px 18px 14px;border-bottom:1px solid var(--border)}
+.logo-mark{font-size:15px;font-weight:600;letter-spacing:-0.3px}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.s-section{padding:14px 10px 6px}
+.s-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);padding:0 8px;margin-bottom:5px;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--rs);cursor:pointer;color:var(--text2);font-size:13px;transition:all .13s;margin-bottom:1px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent)}
+.nav-item i{font-size:15px;width:17px;flex-shrink:0}
+.nbadge{margin-left:auto;font-size:10px;font-weight:600;background:var(--red);color:#fff;padding:1px 5px;border-radius:20px}
+.nbadge.a{background:var(--amber);color:#000}
+.nbadge.g{background:var(--green);color:#000}
+.s-stats{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.sstat{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.sstat-l{font-size:11px;color:var(--text3)}
+.sstat-v{font-size:12px;font-weight:500;font-family:'JetBrains Mono',monospace}
+.main{display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.page-tabs{display:flex;gap:2px}
+.ptab{padding:6px 14px;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border:none;background:transparent;font-family:'Inter',sans-serif;transition:all .13s;display:flex;align-items:center;gap:6px}
+.ptab:hover{background:var(--bg3);color:var(--text)}
+.ptab.active{background:var(--accent-dim);color:var(--accent)}
+.ptab i{font-size:14px}
+.tbright{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:var(--rs);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:all .13s;font-family:'Inter',sans-serif}
+.btn:hover{background:var(--bg4)}
+.btn-p{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-p:hover{opacity:.88;background:var(--accent)}
+.btn i{font-size:14px}
+.notif-btn{position:relative;padding:6px 10px}
+.notif-dot{position:absolute;top:4px;right:6px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--bg2)}
+
+/* Pages */
+.page{display:none;flex:1;overflow:hidden}
+.page.active{display:flex;flex-direction:column}
+
+/* === QUEUE PAGE === */
+.filters{display:flex;align-items:center;gap:7px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;flex-wrap:wrap}
+.fchip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:transparent;transition:all .13s;font-family:'Inter',sans-serif}
+.fchip:hover{border-color:var(--border2);color:var(--text)}
+.fchip.ar{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.fchip.aa{border-color:var(--amber);color:var(--amber);background:var(--amber-dim)}
+.fchip.ab{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.sbox{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:5px 11px}
+.sbox input{background:none;border:none;outline:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;width:150px}
+.sbox input::placeholder{color:var(--text3)}
+.sbox i{color:var(--text3);font-size:14px}
+.q-split{display:flex;flex:1;overflow:hidden}
+.table-area{flex:1;overflow-y:auto}
+.nt{width:100%;border-collapse:collapse}
+.nt th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:500;padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:2}
+.nt td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+.nt tr{transition:background .1s;cursor:pointer}
+.nt tr:hover td{background:var(--bg3)}
+.nt tr.sel td{background:var(--accent-dim)}
+.sla-bar-wrap{display:flex;align-items:center;gap:7px}
+.sla-bar{height:3px;border-radius:2px;background:var(--bg4);width:60px;overflow:hidden}
+.sla-fill{height:100%;border-radius:2px}
+
+/* Chat */
+.chat-panel{width:370px;border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--bg2);flex-shrink:0}
+.ch-header{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ch-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);margin-bottom:3px}
+.ch-title{font-size:13px;font-weight:500;line-height:1.35}
+.ch-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.sla-chip{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.sla-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,201,127,0.25)}
+.sla-warn{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,0.25)}
+.sla-over{background:var(--red-dim);color:var(--red);border:1px solid rgba(232,76,76,0.25)}
+.ch-assign{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.ch-assign-label{font-size:11px;color:var(--text3);flex:1}
+.assign-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:4px 8px;color:var(--text);font-size:11px;font-family:'Inter',sans-serif;outline:none;cursor:pointer}
+.ch-msgs{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;flex-direction:column;gap:3px}
+.msg-hdr{display:flex;align-items:center;gap:7px}
+.msg-auth{font-size:11px;font-weight:500}
+.msg-time{font-size:10px;color:var(--text3);margin-left:auto;font-family:'JetBrains Mono',monospace}
+.msg-body{font-size:12px;color:var(--text2);line-height:1.55;padding:7px 11px;background:var(--bg3);border-radius:var(--rs);border-left:2px solid var(--border2)}
+.msg-body.sys{font-style:italic;color:var(--text3);background:transparent;border-left:2px solid var(--border);padding-left:0}
+.msg-body.urg{border-left-color:var(--red);background:var(--red-dim);color:var(--text)}
+.msg-body.res{border-left-color:var(--green);background:var(--green-dim);color:var(--text)}
+.msg-body.ai{border-left-color:var(--purple);background:var(--purple-dim);color:var(--text)}
+.quick-btns{display:flex;gap:5px;padding:10px 18px 0;flex-wrap:wrap;flex-shrink:0}
+.qbtn{font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .13s;font-family:'Inter',sans-serif}
+.qbtn:hover{border-color:var(--accent);color:var(--accent)}
+.ch-input{padding:12px 18px;border-top:1px solid var(--border);flex-shrink:0}
+.input-row{display:flex;gap:7px;align-items:flex-end}
+.ch-ta{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:8px 11px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;resize:none;outline:none;line-height:1.5;min-height:56px}
+.ch-ta:focus{border-color:var(--accent)}
+.ch-ta::placeholder{color:var(--text3)}
+.send-btn{padding:8px 13px;background:var(--accent);border:none;border-radius:var(--rs);color:#fff;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;white-space:nowrap;align-self:flex-end}
+.send-btn:hover{opacity:.88}
+.ai-btn{padding:8px 10px;background:var(--purple-dim);border:1px solid rgba(167,139,250,0.3);border-radius:var(--rs);color:var(--purple);cursor:pointer;display:flex;align-items:center;font-size:13px;align-self:flex-end;transition:all .13s}
+.ai-btn:hover{background:rgba(167,139,250,0.22)}
+.status-actions{display:flex;gap:5px;padding:10px 18px;border-top:1px solid var(--border);flex-shrink:0}
+.abtn{flex:1;padding:6px 0;border-radius:var(--rs);font-size:11px;font-weight:500;cursor:pointer;border:1px solid;transition:all .13s;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px}
+.abtn-r{border-color:rgba(232,76,76,.3);color:var(--red);background:var(--red-dim)}
+.abtn-r:hover{background:rgba(232,76,76,.22)}
+.abtn-a{border-color:rgba(245,166,35,.3);color:var(--amber);background:var(--amber-dim)}
+.abtn-a:hover{background:rgba(245,166,35,.22)}
+.abtn-g{border-color:rgba(52,201,127,.3);color:var(--green);background:var(--green-dim)}
+.abtn-g:hover{background:rgba(52,201,127,.22)}
+.empty-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:10px;padding:40px}
+.empty-panel i{font-size:36px;opacity:.25}
+.empty-panel p{font-size:12px;text-align:center;line-height:1.7}
+
+/* === DASHBOARD PAGE === */
+.dash-page{flex:1;overflow-y:auto;padding:20px}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.kpi-label{font-size:11px;color:var(--text3);margin-bottom:6px}
+.kpi-val{font-size:26px;font-weight:600;font-family:'JetBrains Mono',monospace;line-height:1}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;margin-top:6px}
+.trend-up{background:var(--red-dim);color:var(--red)}
+.trend-dn{background:var(--green-dim);color:var(--green)}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.chart-title{font-size:12px;font-weight:500;margin-bottom:16px;color:var(--text2)}
+.chart-wrap{position:relative;height:180px}
+.table-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px}
+.tc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tc-title{font-size:12px;font-weight:500;color:var(--text2)}
+.sla-table{width:100%;border-collapse:collapse}
+.sla-table th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:500;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.sla-table td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:12px}
+.sla-progress{display:flex;align-items:center;gap:8px}
+.sla-bar-lg{height:5px;border-radius:3px;background:var(--bg4);flex:1;overflow:hidden;min-width:80px}
+.sla-fill-lg{height:100%;border-radius:3px;transition:width .4s}
+
+/* === AI PAGE === */
+.ai-page{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.ai-top{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ai-icon{width:36px;height:36px;border-radius:50%;background:var(--purple-dim);border:1px solid rgba(167,139,250,.3);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--purple)}
+.ai-title{font-size:14px;font-weight:500}
+.ai-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.ai-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px}
+.ai-msg{display:flex;gap:10px}
+.ai-msg.user{flex-direction:row-reverse}
+.ai-bubble{max-width:70%;padding:10px 14px;border-radius:var(--r);font-size:13px;line-height:1.6}
+.ai-bubble.bot{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.ai-bubble.user{background:var(--accent);color:#fff}
+.ai-bubble.loading{color:var(--text3);font-style:italic}
+.ai-avatar{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px}
+.ai-av-bot{background:var(--purple-dim);color:var(--purple);font-size:11px;font-weight:600}
+.ai-av-user{background:var(--accent-dim);color:var(--accent);font-size:11px;font-weight:600}
+.ai-suggestions{display:flex;gap:7px;flex-wrap:wrap;padding:0 24px 14px;flex-shrink:0}
+.ai-sug{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .13s;font-family:'Inter',sans-serif}
+.ai-sug:hover{border-color:var(--purple);color:var(--purple)}
+.ai-input-bar{display:flex;gap:8px;padding:14px 24px;border-top:1px solid var(--border);flex-shrink:0}
+.ai-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;color:var(--text);font-size:13px;font-family:'Inter',sans-serif;outline:none}
+.ai-input:focus{border-color:var(--purple)}
+.ai-input::placeholder{color:var(--text3)}
+.ai-send{padding:10px 16px;background:var(--purple-dim);border:1px solid rgba(167,139,250,.3);border-radius:var(--r);color:var(--purple);cursor:pointer;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;transition:all .13s}
+.ai-send:hover{background:rgba(167,139,250,.22)}
+
+/* === NOTIFICATIONS PAGE === */
+.notif-page{flex:1;overflow-y:auto;padding:20px 24px}
+.notif-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.notif-group{margin-bottom:20px}
+.notif-group-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px;font-weight:500}
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:all .13s}
+.notif-item:hover{border-color:var(--border2)}
+.notif-item.unread{border-left:3px solid var(--accent)}
+.notif-item.unread.red{border-left-color:var(--red)}
+.notif-item.unread.amber{border-left-color:var(--amber)}
+.notif-item.unread.green{border-left-color:var(--green)}
+.notif-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ni-red{background:var(--red-dim);color:var(--red)}
+.ni-amber{background:var(--amber-dim);color:var(--amber)}
+.ni-green{background:var(--green-dim);color:var(--green)}
+.ni-blue{background:var(--accent-dim);color:var(--accent)}
+.notif-body{flex:1}
+.notif-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.notif-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.notif-time{font-size:10px;color:var(--text3);flex-shrink:0;font-family:'JetBrains Mono',monospace;margin-top:1px}
+
+/* Shared */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
+.badge-r{background:var(--red-dim);color:var(--red);border:1px solid rgba(232,76,76,.25)}
+.badge-a{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,.25)}
+.badge-g{background:var(--green-dim);color:var(--green);border:1px solid rgba(52,201,127,.25)}
+.badge-b{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,124,246,.25)}
+.badge-p{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(167,139,250,.25)}
+.badge i{font-size:9px}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.av-b{background:var(--accent-dim);color:var(--accent)}
+.av-a{background:var(--amber-dim);color:var(--amber)}
+.av-g{background:var(--green-dim);color:var(--green)}
+.av-p{background:var(--purple-dim);color:var(--purple)}
+#toast-area{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:7px;z-index:200}
+.toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 13px;font-size:12px;color:var(--text);display:flex;align-items:center;gap:9px;animation:sIn .18s ease;max-width:280px}
+.toast i{font-size:15px}
+.toast.success{border-color:rgba(52,201,127,.4)}
+.toast.success i{color:var(--green)}
+.toast.warning{border-color:rgba(245,166,35,.4)}
+.toast.warning i{color:var(--amber)}
+.toast.error{border-color:rgba(232,76,76,.4)}
+.toast.error i{color:var(--red)}
+@keyframes sIn{from{transform:translateX(16px);opacity:0}to{transform:translateX(0);opacity:1}}
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:22px;width:460px;max-width:95vw}
+.modal h3{font-size:14px;font-weight:600;margin-bottom:14px}
+.fg{margin-bottom:12px}
+.fg label{font-size:11px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:7px 11px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;outline:none}
+.fi:focus{border-color:var(--accent)}
+.fs{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:7px 11px;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;outline:none;appearance:none;cursor:pointer}
+.mfooter{display:flex;gap:7px;margin-top:18px;justify-content:flex-end}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* === TEAM PAGE === */
+.team-page{flex:1;overflow-y:auto;padding:20px 24px}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .15s}
+.team-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.team-card.active-card{border-color:var(--accent);background:rgba(59,124,246,0.05)}
+.tc-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin-bottom:12px}
+.tc-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.tc-role{font-size:11px;color:var(--text3);margin-bottom:12px}
+.tc-stats-row{display:flex;gap:10px}
+.tc-stat{flex:1;text-align:center}
+.tc-stat-val{font-size:16px;font-weight:600;font-family:'JetBrains Mono',monospace}
+.tc-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.tc-sla-bar{height:3px;border-radius:2px;background:var(--bg4);margin-top:12px;overflow:hidden}
+.tc-sla-fill{height:100%;border-radius:2px;transition:width .5s}
+
+.profile-wrap{display:grid;grid-template-columns:320px 1fr;gap:16px;margin-top:4px}
+.profile-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;align-self:start}
+.profile-av{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600;margin:0 auto 14px}
+.profile-name{font-size:16px;font-weight:600;text-align:center;margin-bottom:3px}
+.profile-role{font-size:12px;color:var(--text3);text-align:center;margin-bottom:4px}
+.profile-status{display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;margin-bottom:16px}
+.status-dot{width:7px;height:7px;border-radius:50%}
+.profile-divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.profile-field{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px}
+.pf-icon{width:28px;height:28px;border-radius:var(--rs);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text3);flex-shrink:0;margin-top:1px}
+.pf-label{font-size:10px;color:var(--text3);margin-bottom:2px}
+.pf-val{font-size:12px;color:var(--text)}
+.profile-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.pkpi{background:var(--bg3);border-radius:var(--rs);padding:10px 12px;text-align:center}
+.pkpi-val{font-size:20px;font-weight:600;font-family:'JetBrains Mono',monospace;line-height:1}
+.pkpi-lbl{font-size:10px;color:var(--text3);margin-top:3px}
+.profile-right{display:flex;flex-direction:column;gap:14px}
+.pr-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.pr-section-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.pr-section-title i{font-size:14px;color:var(--text3)}
+.narad-mini{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.narad-mini:last-child{border-bottom:none;padding-bottom:0}
+.nm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.nm-info{flex:1;min-width:0}
+.nm-id{font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace}
+.nm-title{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nm-obj{font-size:10px;color:var(--text3)}
+.nm-right{text-align:right;flex-shrink:0}
+.nm-age{font-size:11px;font-family:'JetBrains Mono',monospace}
+.nm-sla{font-size:9px;color:var(--text3);margin-top:1px}
+.timeline-item{display:flex;gap:12px;padding-bottom:14px;position:relative}
+.timeline-item:not(:last-child)::before{content:'';position:absolute;left:11px;top:24px;bottom:0;width:1px;background:var(--border)}
+.tl-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;z-index:1}
+.tl-body{flex:1;padding-top:2px}
+.tl-text{font-size:12px;color:var(--text);line-height:1.4;margin-bottom:2px}
+.tl-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.skill-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.skill-name{font-size:12px;color:var(--text2);width:120px;flex-shrink:0}
+.skill-bar{flex:1;height:4px;border-radius:2px;background:var(--bg4);overflow:hidden}
+.skill-fill{height:100%;border-radius:2px;background:var(--accent)}
+.skill-pct{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;width:30px;text-align:right}
+</style>
+</head>
+<body>
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">⬡ НарядТрекер</div>
+    <div class="logo-sub">v3.0 · Закрытие нарядов</div>
+  </div>
+  <div class="s-section">
+    <div class="s-label">Навигация</div>
+    <div class="nav-item active" onclick="goPage('queue',this)"><i class="ti ti-list-details"></i>Очередь нарядов<span class="nbadge" id="nb-all">12</span></div>
+    <div class="nav-item" onclick="goPage('dashboard',this)"><i class="ti ti-chart-bar"></i>Аналитика</div>
+    <div class="nav-item" onclick="goPage('team',this)"><i class="ti ti-users"></i>Исполнители</div>
+    <div class="nav-item" onclick="goPage('ai',this)"><i class="ti ti-sparkles"></i>AI-ассистент<span class="nbadge" style="background:var(--purple);color:#fff">AI</span></div>
+    <div class="nav-item" onclick="goPage('notifs',this)"><i class="ti ti-bell"></i>Уведомления<span class="nbadge a" id="nb-notif">5</span></div>
+  </div>
+  <div class="s-section">
+    <div class="s-label">Фильтр по статусу</div>
+    <div class="nav-item" onclick="sideFilter('critical',this)"><i class="ti ti-flame"></i>Критические<span class="nbadge" id="nb-crit">4</span></div>
+    <div class="nav-item" onclick="sideFilter('pending',this)"><i class="ti ti-clock-pause"></i>Ожидают ответа<span class="nbadge a" id="nb-pend">6</span></div>
+    <div class="nav-item" onclick="sideFilter('review',this)"><i class="ti ti-eye"></i>На проверке</div>
+    <div class="nav-item" onclick="sideFilter('done',this)"><i class="ti ti-circle-check"></i>Закрытые</div>
+  </div>
+  <div class="s-section">
+    <div class="s-label">Объекты</div>
+    <div class="nav-item" onclick="objFilter('Блок А',this)"><i class="ti ti-building"></i>Блок А</div>
+    <div class="nav-item" onclick="objFilter('Блок Б',this)"><i class="ti ti-building"></i>Блок Б</div>
+    <div class="nav-item" onclick="objFilter('ЦТП-3',this)"><i class="ti ti-engine"></i>ЦТП-3</div>
+    <div class="nav-item" onclick="objFilter('Склад',this)"><i class="ti ti-package"></i>Склад №2</div>
+  </div>
+  <div class="s-stats">
+    <div class="sstat"><span class="sstat-l">Среднее SLA</span><span class="sstat-v" id="avg-sla">2.4д</span></div>
+    <div class="sstat"><span class="sstat-l">Закрыто сегодня</span><span class="sstat-v" style="color:var(--green)" id="closed-today">3</span></div>
+    <div class="sstat"><span class="sstat-l">SLA нарушено</span><span class="sstat-v" style="color:var(--red)">4</span></div>
+    <div class="sstat"><span class="sstat-l">Исполнителей</span><span class="sstat-v">5</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-tabs">
+      <button class="ptab active" id="tab-queue" onclick="goPage('queue',null,'tab-queue')"><i class="ti ti-list-details"></i>Наряды</button>
+      <button class="ptab" id="tab-dashboard" onclick="goPage('dashboard',null,'tab-dashboard')"><i class="ti ti-chart-bar"></i>Аналитика</button>
+      <button class="ptab" id="tab-team" onclick="goPage('team',null,'tab-team')"><i class="ti ti-users"></i>Исполнители</button>
+      <button class="ptab" id="tab-ai" onclick="goPage('ai',null,'tab-ai')"><i class="ti ti-sparkles"></i>AI-ассистент</button>
+      <button class="ptab" id="tab-notifs" onclick="goPage('notifs',null,'tab-notifs')"><i class="ti ti-bell"></i>Уведомления</button>
+    </div>
+    <div class="tbright">
+      <button class="btn" onclick="showModal()"><i class="ti ti-plus"></i>Добавить</button>
+      <button class="btn btn-p" onclick="exportReport()"><i class="ti ti-download"></i>Отчёт</button>
+    </div>
+  </div>
+
+  <!-- QUEUE PAGE -->
+  <div class="page active" id="page-queue">
+    <div class="filters">
+      <button class="fchip ar" id="fc-urgent" onclick="toggleChip('urgent','ar')"><i class="ti ti-circle-filled" style="font-size:7px"></i>Срочные</button>
+      <button class="fchip" id="fc-blocked" onclick="toggleChip('blocked','ar')"><i class="ti ti-lock"></i>Заблокированы</button>
+      <button class="fchip" id="fc-waiting" onclick="toggleChip('waiting','aa')"><i class="ti ti-clock"></i>Ждут материал</button>
+      <button class="fchip" id="fc-my" onclick="toggleChip('my','ab')"><i class="ti ti-user"></i>Мои</button>
+      <div class="sbox"><i class="ti ti-search"></i><input placeholder="Поиск..." id="search-inp" oninput="filterSearch(this.value)"></div>
+    </div>
+    <div class="q-split">
+      <div class="table-area">
+        <table class="nt">
+          <thead><tr>
+            <th>Наряд</th><th>Объект / Работа</th><th>Статус</th><th>Исполнитель</th><th>SLA</th><th>Чат</th>
+          </tr></thead>
+          <tbody id="narad-tbody"></tbody>
+        </table>
+      </div>
+      <div class="chat-panel" id="chat-panel">
+        <div id="chat-content">
+          <div class="empty-panel"><i class="ti ti-message-circle"></i><p>Выберите наряд<br>для обсуждения</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div class="page" id="page-dashboard">
+    <div class="dash-page">
+      <div class="dash-grid">
+        <div class="kpi"><div class="kpi-label">Всего зависших</div><div class="kpi-val" style="color:var(--red)">12</div><div class="kpi-trend trend-up"><i class="ti ti-trending-up" style="font-size:11px"></i>+2 за неделю</div></div>
+        <div class="kpi"><div class="kpi-label">Закрыто за месяц</div><div class="kpi-val" style="color:var(--green)">47</div><div class="kpi-trend trend-dn"><i class="ti ti-trending-down" style="font-size:11px"></i>−15% времени</div></div>
+        <div class="kpi"><div class="kpi-label">Среднее время закрытия</div><div class="kpi-val">2.4<span style="font-size:14px;color:var(--text3)">д</span></div><div class="kpi-trend trend-dn" style=""><i class="ti ti-trending-down" style="font-size:11px"></i>−0.6д к прош. мес.</div></div>
+        <div class="kpi"><div class="kpi-label">SLA выполнено</div><div class="kpi-val" style="color:var(--amber)">67<span style="font-size:14px;color:var(--text3)">%</span></div><div class="kpi-trend trend-up"><i class="ti ti-trending-up" style="font-size:11px"></i>цель 85%</div></div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title">Наряды по дням (последние 7 дней)</div><div class="chart-wrap"><canvas id="chart-week"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">Распределение по причинам</div><div class="chart-wrap"><canvas id="chart-reasons"></canvas></div></div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><div class="chart-title">Время закрытия по исполнителям (дней)</div><div class="chart-wrap"><canvas id="chart-assignee"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">SLA по объектам (%)</div><div class="chart-wrap"><canvas id="chart-objects"></canvas></div></div>
+      </div>
+      <div class="table-card">
+        <div class="tc-head"><span class="tc-title">SLA-контроль по исполнителям</span><button class="btn" style="font-size:11px" onclick="showToast('Экспорт SLA-отчёта...','success')"><i class="ti ti-download"></i>Экспорт</button></div>
+        <table class="sla-table">
+          <thead><tr><th>Исполнитель</th><th>Активных</th><th>Просрочено</th><th>Ср. время</th><th>SLA %</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-a">СК</div>Сергей К.</div></td><td>3</td><td><span style="color:var(--red);font-weight:500">2</span></td><td>3.1д</td><td><div class="sla-progress"><div class="sla-bar-lg"><div class="sla-fill-lg" style="width:58%;background:var(--amber)"></div></div><span style="font-size:11px;color:var(--amber)">58%</span></div></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-b">АВ</div>Алина В.</div></td><td>2</td><td><span style="color:var(--red);font-weight:500">1</span></td><td>4.2д</td><td><div class="sla-progress"><div class="sla-bar-lg"><div class="sla-fill-lg" style="width:45%;background:var(--red)"></div></div><span style="font-size:11px;color:var(--red)">45%</span></div></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-g">РТ</div>Руслан Т.</div></td><td>2</td><td>0</td><td>1.8д</td><td><div class="sla-progress"><div class="sla-bar-lg"><div class="sla-fill-lg" style="width:88%;background:var(--green)"></div></div><span style="font-size:11px;color:var(--green)">88%</span></div></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="av av-p">ИМ</div>Иван М.</div></td><td>5</td><td><span style="color:var(--amber);font-weight:500">1</span></td><td>2.0д</td><td><div class="sla-progress"><div class="sla-bar-lg"><div class="sla-fill-lg" style="width:76%;background:var(--accent)"></div></div><span style="font-size:11px;color:var(--accent)">76%</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM PAGE -->
+  <div class="page" id="page-team">
+    <div class="team-page">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div style="font-size:15px;font-weight:500">Исполнители</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Профили, нагрузка и статистика по нарядам</div>
+        </div>
+        <button class="btn btn-p" onclick="openAddMember()"><i class="ti ti-user-plus"></i>Добавить</button>
+      </div>
+      <div class="team-grid" id="team-cards"></div>
+      <div class="profile-wrap" id="profile-wrap" style="display:none">
+        <div id="profile-left"></div>
+        <div class="profile-right" id="profile-right"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI PAGE -->
+  <div class="page" id="page-ai">
+    <div class="ai-page">
+      <div class="ai-top">
+        <div class="ai-icon"><i class="ti ti-sparkles"></i></div>
+        <div><div class="ai-title">AI-ассистент по нарядам</div><div class="ai-sub">Анализ, рекомендации и автозаполнение</div></div>
+        <div style="margin-left:auto"><span class="badge badge-p"><i class="ti ti-circle-filled" style="font-size:7px"></i>Claude Sonnet</span></div>
+      </div>
+      <div class="ai-msgs" id="ai-msgs">
+        <div class="ai-msg">
+          <div class="ai-avatar ai-av-bot">AI</div>
+          <div class="ai-bubble bot">Привет! Я помогаю ускорить закрытие нарядов. Могу проанализировать причины зависания, предложить план действий, найти похожие случаи или составить отчёт. Что вас интересует?</div>
+        </div>
+      </div>
+      <div class="ai-suggestions" id="ai-sugs">
+        <button class="ai-sug" onclick="aiAsk('Какие наряды критичны прямо сейчас?')">Критичные сейчас</button>
+        <button class="ai-sug" onclick="aiAsk('Почему наряды зависают чаще всего?')">Топ причин зависания</button>
+        <button class="ai-sug" onclick="aiAsk('Как улучшить SLA по исполнителям?')">Улучшить SLA</button>
+        <button class="ai-sug" onclick="aiAsk('Составь план закрытия просроченных нарядов')">План закрытия</button>
+        <button class="ai-sug" onclick="aiAsk('Кто из исполнителей перегружен?')">Загрузка команды</button>
+      </div>
+      <div class="ai-input-bar">
+        <input class="ai-input" id="ai-input" placeholder="Спросите что-нибудь о нарядах..." onkeydown="if(event.key==='Enter')aiSend()">
+        <button class="ai-send" onclick="aiSend()"><i class="ti ti-send"></i> Спросить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFS PAGE -->
+  <div class="page" id="page-notifs">
+    <div class="notif-page">
+      <div class="notif-header">
+        <span style="font-size:14px;font-weight:500">Уведомления</span>
+        <button class="btn" onclick="markAllRead()"><i class="ti ti-check"></i>Все прочитаны</button>
+      </div>
+      <div class="notif-group">
+        <div class="notif-group-label">Сегодня</div>
+        <div class="notif-item unread red" onclick="goNarad('НАР-2024-0201')">
+          <div class="notif-icon ni-red"><i class="ti ti-flame"></i></div>
+          <div class="notif-body"><div class="notif-title">SLA нарушен — НАР-2024-0201</div><div class="notif-desc">Ревизия теплообменника (ЦТП-3) просрочена на 2 дня. Назначен: Алина В.</div></div>
+          <div class="notif-time">09:14</div>
+        </div>
+        <div class="notif-item unread red" onclick="goNarad('НАР-2024-0187')">
+          <div class="notif-icon ni-red"><i class="ti ti-alert-triangle"></i></div>
+          <div class="notif-body"><div class="notif-title">Эскалация — НАР-2024-0187</div><div class="notif-desc">Замена насоса ХВС (Блок А) — 8 дней без движения. Требует внимания.</div></div>
+          <div class="notif-time">08:30</div>
+        </div>
+        <div class="notif-item unread amber" onclick="goNarad('НАР-2024-0198')">
+          <div class="notif-icon ni-amber"><i class="ti ti-clock"></i></div>
+          <div class="notif-body"><div class="notif-title">Напоминание — НАР-2024-0198</div><div class="notif-desc">Замена счётчика (Склад №2): Баев С. выходит завтра. Подтвердите готовность.</div></div>
+          <div class="notif-time">08:00</div>
+        </div>
+        <div class="notif-item unread green">
+          <div class="notif-icon ni-green"><i class="ti ti-circle-check"></i></div>
+          <div class="notif-body"><div class="notif-title">Наряд закрыт — НАР-2024-0210</div><div class="notif-desc">Ремонт освещения коридора закрыт Русланом Т. за 1.5 дня. SLA выполнен.</div></div>
+          <div class="notif-time">07:45</div>
+        </div>
+      </div>
+      <div class="notif-group">
+        <div class="notif-group-label">Вчера</div>
+        <div class="notif-item" onclick="goNarad('НАР-2024-0215')">
+          <div class="notif-icon ni-amber"><i class="ti ti-cloud-rain"></i></div>
+          <div class="notif-body"><div class="notif-title">Погодная задержка — НАР-2024-0215</div><div class="notif-desc">Окраска фасада (Блок Б): прогноз показывает окно с пятницы. Обновите план.</div></div>
+          <div class="notif-time">18:20</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon ni-blue"><i class="ti ti-user-plus"></i></div>
+          <div class="notif-body"><div class="notif-title">Назначение — НАР-2024-0222</div><div class="notif-desc">Ремонт кровли секции 4 назначен на Алину В. Срок: 5 дней.</div></div>
+          <div class="notif-time">14:05</div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-icon ni-red"><i class="ti ti-package-off"></i></div>
+          <div class="notif-body"><div class="notif-title">Нет материала — НАР-2024-0187</div><div class="notif-desc">Поставщик задержал насос. Ожидаемая дата поставки сдвинута на +2 дня.</div></div>
+          <div class="notif-time">11:00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal-ov" id="modal" style="display:none">
+  <div class="modal">
+    <h3>Добавить зависший наряд</h3>
+    <div class="fg"><label>Номер наряда</label><input class="fi" placeholder="НАР-2024-XXXX" id="n-id"></div>
+    <div class="fg"><label>Объект</label><input class="fi" placeholder="Блок А, ЦТП-3..." id="n-obj"></div>
+    <div class="fg"><label>Описание работы</label><input class="fi" placeholder="Краткое описание" id="n-desc"></div>
+    <div class="fg"><label>Исполнитель</label><select class="fs" id="n-assign"><option>Сергей К.</option><option>Алина В.</option><option>Руслан Т.</option><option>Иван М.</option><option>Не назначен</option></select></div>
+    <div class="fg"><label>Причина зависания</label><select class="fs" id="n-reason"><option>Нет материала</option><option>Ждёт согласования</option><option>Недостаточно персонала</option><option>Техническое ограничение</option><option>Документация не готова</option></select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>SLA (дней)</label><input class="fi" type="number" value="5" id="n-sla" min="1" max="30"></div>
+      <div class="fg"><label>Приоритет</label><select class="fs" id="n-priority"><option value="critical">Критический</option><option value="pending" selected>Высокий</option><option value="review">Средний</option></select></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn" onclick="hideModal()">Отмена</button>
+      <button class="btn btn-p" onclick="addNarad()">Добавить наряд</button>
+    </div>
+  </div>
+</div>
+<div id="toast-area"></div>
+
+<script>
+const TEAM = ['Сергей К.','Алина В.','Руслан Т.','Иван М.','Не назначен'];
+const TEAM_META = {'Сергей К.':{i:'СК',c:'av-a'},'Алина В.':{i:'АВ',c:'av-b'},'Руслан Т.':{i:'РТ',c:'av-g'},'Иван М.':{i:'ИМ',c:'av-p'},'Не назначен':{i:'?',c:'av-b'}};
+
+const TEAM_DATA = [
+  {
+    name:'Сергей К.', full:'Сергей Ковалёв', role:'Слесарь-сантехник 5р', avClass:'av-a', avBg:'var(--amber-dim)', avColor:'var(--amber)',
+    status:'online', statusColor:'var(--green)', statusLabel:'На объекте',
+    phone:'+7 701 234 56 78', email:'s.kovalev@narad.kz', dept:'Инженерно-техническая служба',
+    joined:'15.03.2019', category:'Сантехника, ХВС/ГВС, насосы',
+    sla:58, avgTime:3.1, total:47, closed:27, overdue:2,
+    skills:[{name:'Сантехника',pct:95},{name:'Насосное оборудование',pct:88},{name:'ХВС/ГВС',pct:92},{name:'Сварочные работы',pct:60},{name:'Документация',pct:55}],
+    timeline:[
+      {icon:'ti-circle-check',ic:'ni-green',text:'Закрыт НАР-2024-0183 — Замена трубы ХВС, 2.0д',time:'Вчера 17:30'},
+      {icon:'ti-message-circle',ic:'ni-blue',text:'Обновил статус по НАР-2024-0187 — ожидает поставки',time:'Сегодня 11:05'},
+      {icon:'ti-alert-triangle',ic:'ni-red',text:'Просрочен НАР-2024-0198 — нет допуска энергетика',time:'Сегодня 08:00'},
+    ]
+  },
+  {
+    name:'Алина В.', full:'Алина Васильева', role:'Инженер-строитель', avClass:'av-b', avBg:'var(--accent-dim)', avColor:'var(--accent)',
+    status:'away', statusColor:'var(--amber)', statusLabel:'Не в сети',
+    phone:'+7 702 345 67 89', email:'a.vasilyeva@narad.kz', dept:'Строительный отдел',
+    joined:'02.08.2021', category:'Кровля, отделка, инженерные системы',
+    sla:45, avgTime:4.2, total:31, closed:14, overdue:3,
+    skills:[{name:'Кровельные работы',pct:90},{name:'Отделочные работы',pct:82},{name:'Инженерные системы',pct:74},{name:'Согласование',pct:65},{name:'Документация',pct:80}],
+    timeline:[
+      {icon:'ti-file-text',ic:'ni-blue',text:'Запросила актуальный чертёж по НАР-2024-0201',time:'Сегодня 11:50'},
+      {icon:'ti-circle-check',ic:'ni-green',text:'Завершила кровельные работы по НАР-2024-0222',time:'Вчера 18:30'},
+      {icon:'ti-user',ic:'ni-amber',text:'Назначена на НАР-2024-0222 — ремонт кровли',time:'2 дня назад'},
+    ]
+  },
+  {
+    name:'Руслан Т.', full:'Руслан Токтаров', role:'Мастер по благоустройству', avClass:'av-g', avBg:'var(--green-dim)', avColor:'var(--green)',
+    status:'online', statusColor:'var(--green)', statusLabel:'На объекте',
+    phone:'+7 705 456 78 90', email:'r.toktarov@narad.kz', dept:'Отдел благоустройства',
+    joined:'10.01.2020', category:'Фасады, кровля, внешние работы',
+    sla:88, avgTime:1.8, total:62, closed:55, overdue:1,
+    skills:[{name:'Фасадные работы',pct:97},{name:'Кровля внешняя',pct:85},{name:'Малярные работы',pct:90},{name:'Ландшафт',pct:72},{name:'Спецтехника',pct:68}],
+    timeline:[
+      {icon:'ti-clock',ic:'ni-amber',text:'Отложил НАР-2024-0215 — дождь, ждёт погодное окно',time:'Сегодня 09:10'},
+      {icon:'ti-circle-check',ic:'ni-green',text:'Закрыт НАР-2024-0210 — ремонт освещения, 1.5д',time:'Вчера 16:00'},
+      {icon:'ti-circle-check',ic:'ni-green',text:'Закрыт НАР-2024-0204 — прочистка водостоков',time:'3 дня назад'},
+    ]
+  },
+  {
+    name:'Иван М.', full:'Иван Мусаев', role:'Диспетчер / Инженер ПТО', avClass:'av-p', avBg:'var(--purple-dim)', avColor:'var(--purple)',
+    status:'online', statusColor:'var(--green)', statusLabel:'В офисе',
+    phone:'+7 707 567 89 01', email:'i.musaev@narad.kz', dept:'Производственно-технический отдел',
+    joined:'05.06.2018', category:'Координация, контроль, согласование',
+    sla:76, avgTime:2.0, total:120, closed:91, overdue:4,
+    skills:[{name:'Координация',pct:96},{name:'Техн. документация',pct:88},{name:'Контроль SLA',pct:91},{name:'1С:ТОИР',pct:85},{name:'AutoCAD',pct:60}],
+    timeline:[
+      {icon:'ti-bell',ic:'ni-red',text:'Эскалировал НАР-2024-0201 — ревизия теплообменника',time:'Сегодня 09:14'},
+      {icon:'ti-user-plus',ic:'ni-blue',text:'Нашёл замену энергетика по НАР-2024-0198',time:'Сегодня 13:00'},
+      {icon:'ti-message-circle',ic:'ni-amber',text:'Напомнил Алине В. по НАР-2024-0201 — 12 дней',time:'Вчера 16:00'},
+    ]
+  },
+];
+
+let selectedMember = null;
+
+function renderTeamCards() {
+  const wrap = document.getElementById('team-cards'); if(!wrap) return;
+  wrap.innerHTML = '';
+  TEAM_DATA.forEach((m,i) => {
+    const myNarads = narads.filter(n=>n.assignee===m.name);
+    const overdue = myNarads.filter(n=>n.age>n.sla).length;
+    const slaColor = m.sla>=80?'var(--green)':m.sla>=60?'var(--amber)':'var(--red)';
+    const card = document.createElement('div');
+    card.className = 'team-card' + (selectedMember===m.name?' active-card':'');
+    card.innerHTML = `
+      <div class="tc-avatar" style="background:${m.avBg};color:${m.avColor}">${m.i||m.name.slice(0,2)}</div>
+      <div class="tc-name">${m.full}</div>
+      <div class="tc-role">${m.role}</div>
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px">
+        <div class="status-dot" style="background:${m.statusColor}"></div>
+        <span style="font-size:10px;color:var(--text3)">${m.statusLabel}</span>
+      </div>
+      <div class="tc-stats-row">
+        <div class="tc-stat"><div class="tc-stat-val" style="color:var(--accent)">${myNarads.length}</div><div class="tc-stat-lbl">Активных</div></div>
+        <div class="tc-stat"><div class="tc-stat-val" style="color:${overdue>0?'var(--red)':'var(--green)'}">${overdue}</div><div class="tc-stat-lbl">Просроч.</div></div>
+        <div class="tc-stat"><div class="tc-stat-val" style="color:${slaColor}">${m.sla}%</div><div class="tc-stat-lbl">SLA</div></div>
+      </div>
+      <div class="tc-sla-bar"><div class="tc-sla-fill" style="width:${m.sla}%;background:${slaColor}"></div></div>`;
+    card.onclick = () => openProfile(m.name);
+    wrap.appendChild(card);
+  });
+}
+
+function openProfile(name) {
+  selectedMember = name;
+  renderTeamCards();
+  const m = TEAM_DATA.find(x=>x.name===name); if(!m) return;
+  const myNarads = narads.filter(n=>n.assignee===name);
+  const overdue = myNarads.filter(n=>n.age>n.sla).length;
+  const slaColor = m.sla>=80?'var(--green)':m.sla>=60?'var(--amber)':'var(--red)';
+  const statusMap = {critical:'nm-dot" style="background:var(--red)',pending:'nm-dot" style="background:var(--amber)',review:'nm-dot" style="background:var(--accent)',done:'nm-dot" style="background:var(--green)'};
+
+  document.getElementById('profile-left').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-av" style="background:${m.avBg};color:${m.avColor}">${m.name.slice(0,2)}</div>
+      <div class="profile-name">${m.full}</div>
+      <div class="profile-role">${m.role}</div>
+      <div class="profile-status">
+        <div class="status-dot" style="background:${m.statusColor}"></div>
+        <span style="color:var(--text3)">${m.statusLabel}</span>
+      </div>
+      <hr class="profile-divider">
+      <div class="profile-field"><div class="pf-icon"><i class="ti ti-phone"></i></div><div><div class="pf-label">Телефон</div><div class="pf-val">${m.phone}</div></div></div>
+      <div class="profile-field"><div class="pf-icon"><i class="ti ti-mail"></i></div><div><div class="pf-label">Email</div><div class="pf-val">${m.email}</div></div></div>
+      <div class="profile-field"><div class="pf-icon"><i class="ti ti-building"></i></div><div><div class="pf-label">Отдел</div><div class="pf-val">${m.dept}</div></div></div>
+      <div class="profile-field"><div class="pf-icon"><i class="ti ti-calendar"></i></div><div><div class="pf-label">В компании с</div><div class="pf-val">${m.joined}</div></div></div>
+      <div class="profile-field"><div class="pf-icon"><i class="ti ti-tools"></i></div><div><div class="pf-label">Специализация</div><div class="pf-val">${m.category}</div></div></div>
+      <hr class="profile-divider">
+      <div class="profile-kpis">
+        <div class="pkpi"><div class="pkpi-val" style="color:${slaColor}">${m.sla}%</div><div class="pkpi-lbl">SLA</div></div>
+        <div class="pkpi"><div class="pkpi-val">${m.avgTime}д</div><div class="pkpi-lbl">Ср. время</div></div>
+        <div class="pkpi"><div class="pkpi-val" style="color:var(--green)">${m.closed}</div><div class="pkpi-lbl">Закрыто</div></div>
+        <div class="pkpi"><div class="pkpi-val" style="color:${overdue>0?'var(--red)':'var(--text3)'}">${overdue}</div><div class="pkpi-lbl">Просрочено</div></div>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:14px">
+        <button class="btn" style="flex:1;font-size:11px;justify-content:center" onclick="goPage('ai',null,'tab-ai');setTimeout(()=>aiAsk('Проанализируй работу исполнителя ${m.full}: SLA ${m.sla}%, среднее время закрытия ${m.avgTime}д, просроченных нарядов ${overdue}. Что рекомендуешь для улучшения?'),100)"><i class="ti ti-sparkles"></i>AI-анализ</button>
+        <button class="btn btn-p" style="flex:1;font-size:11px;justify-content:center" onclick="showToast('Уведомление отправлено ${m.full}','success')"><i class="ti ti-send"></i>Написать</button>
+      </div>
+    </div>`;
+
+  const naradRows = myNarads.length > 0 ? myNarads.map(n=>{
+    const pct=Math.min(100,Math.round((n.age/n.sla)*100));
+    const c=pct>=100?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
+    return `<div class="narad-mini" onclick="goNarad('${n.id}')" style="cursor:pointer">
+      <div class="${statusMap[n.status]||statusMap.pending}"></div>
+      <div class="nm-info"><div class="nm-id">${n.id}</div><div class="nm-title">${n.title}</div><div class="nm-obj">${n.obj}</div></div>
+      <div class="nm-right"><div class="nm-age" style="color:${c}">${n.age}д</div><div class="nm-sla">SLA: ${n.sla}д</div></div>
+    </div>`;
+  }).join('') : `<div style="padding:20px;text-align:center;color:var(--text3);font-size:12px"><i class="ti ti-circle-check" style="font-size:24px;display:block;margin-bottom:8px;color:var(--green);opacity:.6"></i>Нет активных нарядов</div>`;
+
+  document.getElementById('profile-right').innerHTML = `
+    <div class="pr-section">
+      <div class="pr-section-title"><i class="ti ti-list-details"></i>Активные наряды (${myNarads.length})</div>
+      ${naradRows}
+    </div>
+    <div class="pr-section">
+      <div class="pr-section-title"><i class="ti ti-tools"></i>Компетенции</div>
+      ${m.skills.map(s=>`<div class="skill-row"><div class="skill-name">${s.name}</div><div class="skill-bar"><div class="skill-fill" style="width:${s.pct}%"></div></div><div class="skill-pct">${s.pct}%</div></div>`).join('')}
+    </div>
+    <div class="pr-section">
+      <div class="pr-section-title"><i class="ti ti-history"></i>Последние действия</div>
+      ${m.timeline.map(t=>`<div class="timeline-item"><div class="tl-icon ${t.ic}"><i class="ti ${t.icon}" style="font-size:11px"></i></div><div class="tl-body"><div class="tl-text">${t.text}</div><div class="tl-time">${t.time}</div></div></div>`).join('')}
+    </div>`;
+
+  document.getElementById('profile-wrap').style.display = 'grid';
+}
+
+function openAddMember() { showToast('Функция добавления исполнителя в разработке','warning'); }
+
+const narads = [
+  {id:'НАР-2024-0187',title:'Замена насоса ХВС',obj:'Блок А, эт.3',status:'critical',statusLabel:'Просрочен',age:8,sla:5,assignee:'Сергей К.',reason:'Нет материала',msgs:5,thread:[
+    {author:'Система',time:'10:22',text:'Наряд открыт. SLA: 5 дней.',type:'sys'},
+    {author:'Сергей К.',time:'11:05',text:'Насос заказан, ожидаем поставку от поставщика.',type:''},
+    {author:'Иван М.',time:'14:30',text:'Когда ожидается поставка? Жильцы жалуются, давление упало на 30%.',type:'urg'},
+    {author:'Сергей К.',time:'14:55',text:'Поставщик подтвердил доставку завтра до 12:00. Установка займёт 2-3 часа.',type:''},
+    {author:'Диспетчер',time:'15:10',text:'✓ Отмечено. Напомним завтра в 12:00.',type:'sys'},
+  ]},
+  {id:'НАР-2024-0201',title:'Ревизия теплообменника',obj:'ЦТП-3',status:'critical',statusLabel:'Просрочен',age:12,sla:10,assignee:'Алина В.',reason:'Ждёт согласования',msgs:5,thread:[
+    {author:'Система',time:'09:00',text:'Наряд открыт. Требуется допуск главного инженера.',type:'sys'},
+    {author:'Алина В.',time:'09:45',text:'Направлен запрос на допуск главному инженеру Петрову Н.А.',type:''},
+    {author:'Петров Н.А.',time:'11:30',text:'Не могу подписать без обновлённой схемы. Где актуальный чертёж?',type:'urg'},
+    {author:'Алина В.',time:'11:50',text:'Запрошу у проектировщиков, это займёт до конца дня.',type:''},
+    {author:'Иван М.',time:'16:00',text:'Чертёж получен? Это уже 12 дней висит.',type:'urg'},
+  ]},
+  {id:'НАР-2024-0215',title:'Окраска фасада крыла Б',obj:'Блок Б, внешний',status:'pending',statusLabel:'Ожидание',age:5,sla:10,assignee:'Руслан Т.',reason:'Погодные условия',msgs:3,thread:[
+    {author:'Система',time:'08:00',text:'Наряд открыт. Плановые работы.',type:'sys'},
+    {author:'Руслан Т.',time:'09:10',text:'Работы отложены из-за дождей. Температура ниже допустимой.',type:''},
+    {author:'Иван М.',time:'10:00',text:'По прогнозу окно 3-4 дня с пятницы. Успеем?',type:''},
+  ]},
+  {id:'НАР-2024-0198',title:'Замена счётчика эл.',obj:'Склад №2',status:'pending',statusLabel:'Ожидание',age:6,sla:7,assignee:'Сергей К.',reason:'Нет допуска энергетика',msgs:4,thread:[
+    {author:'Система',time:'07:30',text:'Наряд открыт. Требуется энергетик 3-й группы.',type:'sys'},
+    {author:'Сергей К.',time:'08:20',text:'Наш энергетик на больничном. Нужен замещающий.',type:''},
+    {author:'Диспетчер',time:'09:00',text:'Запрос направлен в ОК на поиск замещения.',type:'sys'},
+    {author:'Иван М.',time:'13:00',text:'ОК нашли замену — Баев С. выйдет в четверг.',type:'res'},
+  ]},
+  {id:'НАР-2024-0222',title:'Ремонт кровли секции 4',obj:'Блок А, кровля',status:'review',statusLabel:'Проверка',age:3,sla:5,assignee:'Алина В.',reason:'Завершён, ждёт акт',msgs:6,thread:[
+    {author:'Система',time:'06:00',text:'Наряд открыт. Аварийный ремонт кровли.',type:'sys'},
+    {author:'Алина В.',time:'18:30',text:'Работы завершены. Заменено 14 м² мягкой кровли.',type:'res'},
+    {author:'Иван М.',time:'18:45',text:'Подтверждаю. Пришли фото + акт выполненных работ.',type:''},
+  ]},
+  {id:'НАР-2024-0177',title:'Прочистка канализации',obj:'Блок Б, подвал',status:'pending',statusLabel:'Ожидание',age:4,sla:7,assignee:'Руслан Т.',reason:'Нет спецтехники',msgs:2,thread:[
+    {author:'Система',time:'10:00',text:'Наряд открыт. Засор на глубине >5м.',type:'sys'},
+    {author:'Руслан Т.',time:'10:40',text:'Машина занята до вечера. Планирую завтра с утра.',type:''},
+  ]},
+];
+
+let selectedId=null, currentFilter='all', currentSearch='';
+
+// PAGE ROUTING
+function goPage(p, navEl, tabId) {
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.ptab').forEach(x=>x.classList.remove('active'));
+  if(tabId) document.getElementById(tabId).classList.add('active');
+  else { const t=document.getElementById('tab-'+p); if(t) t.classList.add('active'); }
+  if(navEl) { document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active')); navEl.classList.add('active'); }
+  if(p==='dashboard') renderCharts();
+  if(p==='notifs') document.getElementById('nb-notif').textContent='0';
+  if(p==='team') renderTeamCards();
+}
+
+// TABLE RENDER
+function renderTable(data) {
+  const tb=document.getElementById('narad-tbody'); tb.innerHTML='';
+  data.forEach(n=>{
+    const pct=Math.min(100,Math.round((n.age/n.sla)*100));
+    const barColor=pct>=100?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
+    const tm=TEAM_META[n.assignee]||{i:'?',c:'av-b'};
+    const sbMap={critical:'badge-r',pending:'badge-a',review:'badge-b',done:'badge-g'};
+    const sbLabel={critical:'Просрочен',pending:'Ожидание',review:'Проверка',done:'Закрыт'};
+    const tr=document.createElement('tr');
+    tr.setAttribute('data-id',n.id);
+    if(selectedId===n.id) tr.classList.add('sel');
+    tr.innerHTML=`
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);font-weight:500">${n.id}</span></td>
+      <td><div style="font-weight:500;font-size:12px;color:var(--text);margin-bottom:2px">${n.title}</div><div style="font-size:10px;color:var(--text3)"><i class="ti ti-map-pin" style="font-size:9px;vertical-align:-1px"></i> ${n.obj}</div></td>
+      <td><span class="badge ${sbMap[n.status]||'badge-b'}">${sbLabel[n.status]||n.statusLabel}</span></td>
+      <td><div style="display:flex;align-items:center;gap:7px"><div class="av ${tm.c}">${tm.i}</div><span style="font-size:11px;color:var(--text2)">${n.assignee}</span></div></td>
+      <td><div class="sla-bar-wrap"><div class="sla-bar"><div class="sla-fill" style="width:${pct}%;background:${barColor}"></div></div><span style="font-size:10px;color:${barColor};font-family:'JetBrains Mono',monospace;min-width:32px">${n.age}/${n.sla}д</span></div></td>
+      <td><span style="font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px"><i class="ti ti-message-circle" style="font-size:13px"></i>${n.msgs}</span></td>`;
+    tr.onclick=()=>openChat(n.id);
+    tb.appendChild(tr);
+  });
+  document.getElementById('nb-all').textContent=data.length;
+  document.getElementById('nb-crit').textContent=narads.filter(x=>x.status==='critical').length;
+  document.getElementById('nb-pend').textContent=narads.filter(x=>x.status==='pending').length;
+}
+
+// CHAT
+function openChat(id) {
+  selectedId=id;
+  const n=narads.find(x=>x.id===id); if(!n) return;
+  document.querySelectorAll('.nt tr').forEach(t=>t.classList.remove('sel'));
+  const tr=document.querySelector(`tr[data-id="${id}"]`); if(tr) tr.classList.add('sel');
+  const pct=Math.min(100,Math.round((n.age/n.sla)*100));
+  const slaClass=pct>=100?'sla-over':pct>=70?'sla-warn':'sla-ok';
+  const slaLabel=pct>=100?`SLA нарушен +${n.age-n.sla}д`:`SLA: ${n.age}/${n.sla}д (${pct}%)`;
+  const html=`
+    <div class="ch-header">
+      <div class="ch-id">${n.id}</div>
+      <div class="ch-title">${n.title}</div>
+      <div class="ch-meta">
+        <span class="badge ${n.status==='critical'?'badge-r':n.status==='pending'?'badge-a':n.status==='done'?'badge-g':'badge-b'}">${n.statusLabel}</span>
+        <span class="${slaClass} sla-chip">${slaLabel}</span>
+        <span style="font-size:10px;color:var(--text3)"><i class="ti ti-info-circle" style="font-size:10px;vertical-align:-1px"></i> ${n.reason}</span>
+      </div>
+    </div>
+    <div class="ch-assign">
+      <i class="ti ti-user-circle" style="font-size:16px;color:var(--text3)"></i>
+      <span class="ch-assign-label">Исполнитель:</span>
+      <select class="assign-select" onchange="reassign('${id}',this.value)">
+        ${TEAM.map(t=>`<option${t===n.assignee?' selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="ch-msgs" id="thread-msgs">
+      ${n.thread.map(m=>`
+        <div class="msg">
+          <div class="msg-hdr"><span class="msg-auth">${m.author}</span><span class="msg-time">${m.time}</span></div>
+          <div class="msg-body ${m.type}">${m.text}</div>
+        </div>`).join('')}
+    </div>
+    <div class="quick-btns">
+      <button class="qbtn" onclick="insertQ('Материал получен. Приступаю к работе.')">✓ Материал</button>
+      <button class="qbtn" onclick="insertQ('Согласование получено.')">✓ Согласование</button>
+      <button class="qbtn" onclick="insertQ('Работы завершены. Прошу проверку.')">✓ Завершено</button>
+      <button class="qbtn" onclick="askAiForNarad('${id}')">✦ Спросить AI</button>
+    </div>
+    <div class="ch-input">
+      <div class="input-row">
+        <textarea class="ch-ta" id="msg-inp" placeholder="Написать в обсуждение..."></textarea>
+        <button class="send-btn" onclick="sendMsg('${id}')"><i class="ti ti-send"></i>Отправить</button>
+      </div>
+    </div>
+    <div class="status-actions">
+      <button class="abtn abtn-r" onclick="changeStatus('${id}','critical','Просрочен')"><i class="ti ti-flame" style="font-size:12px"></i>Эскалация</button>
+      <button class="abtn abtn-a" onclick="changeStatus('${id}','pending','Ожидание')"><i class="ti ti-clock" style="font-size:12px"></i>Отложить</button>
+      <button class="abtn abtn-g" onclick="changeStatus('${id}','done','Закрыт')"><i class="ti ti-check" style="font-size:12px"></i>Закрыть</button>
+    </div>`;
+  document.getElementById('chat-content').innerHTML=html;
+  const m=document.getElementById('thread-msgs'); if(m) m.scrollTop=m.scrollHeight;
+}
+
+function insertQ(t){const e=document.getElementById('msg-inp');if(e){e.value=t;e.focus();}}
+
+function sendMsg(id) {
+  const el=document.getElementById('msg-inp'); if(!el||!el.value.trim()) return;
+  const n=narads.find(x=>x.id===id); if(!n) return;
+  const now=new Date(); const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  n.thread.push({author:'Вы',time:t,text:el.value.trim(),type:''});
+  n.msgs++; el.value=''; openChat(id); renderTable(getCurrentData());
+  showToast('Сообщение отправлено','success');
+}
+
+function reassign(id, person) {
+  const n=narads.find(x=>x.id===id); if(!n) return;
+  const old=n.assignee; n.assignee=person;
+  const now=new Date(); const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  n.thread.push({author:'Система',time:t,text:`Исполнитель изменён: ${old} → ${person}`,type:'sys'});
+  renderTable(getCurrentData()); openChat(id);
+  showToast(`Назначен: ${person}`,'success');
+}
+
+function changeStatus(id,status,label) {
+  const n=narads.find(x=>x.id===id); if(!n) return;
+  n.status=status; n.statusLabel=label;
+  const now=new Date(); const t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  if(status==='done'){
+    n.thread.push({author:'Система',time:t,text:`✓ Наряд закрыт. Время: ${n.age}д из ${n.sla}д SLA.`,type:'res'});
+    showToast(`Наряд ${id} закрыт!`,'success');
+    const ct=document.getElementById('closed-today'); ct.textContent=parseInt(ct.textContent)+1;
+  } else if(status==='critical'){
+    n.thread.push({author:'Система',time:t,text:`⚠ Эскалация. Уведомление отправлено руководству.`,type:'urg'});
+    showToast(`Наряд ${id} эскалирован`,'warning');
+  }
+  renderTable(getCurrentData()); openChat(id);
+}
+
+function sideFilter(s,el){ currentFilter=s; goPage('queue',el,'tab-queue'); renderTable(getCurrentData()); }
+function objFilter(o,el){ currentSearch=o.toLowerCase(); goPage('queue',el,'tab-queue'); renderTable(getCurrentData()); }
+function filterSearch(v){ currentSearch=v.toLowerCase(); renderTable(getCurrentData()); }
+function toggleChip(chip,cls){ const el=document.getElementById('fc-'+chip); el.classList.toggle(cls); }
+function goNarad(id){ goPage('queue',null,'tab-queue'); setTimeout(()=>openChat(id),50); }
+
+function getCurrentData(){
+  return narads.filter(n=>{
+    const ms=currentFilter==='all'||n.status===currentFilter;
+    const mq=!currentSearch||n.id.toLowerCase().includes(currentSearch)||n.obj.toLowerCase().includes(currentSearch)||n.title.toLowerCase().includes(currentSearch);
+    return ms&&mq;
+  });
+}
+
+// MODAL
+function showModal(){document.getElementById('modal').style.display='flex';}
+function hideModal(){document.getElementById('modal').style.display='none';}
+function addNarad(){
+  const id=document.getElementById('n-id').value||'НАР-2024-'+Math.floor(Math.random()*900+100);
+  const obj=document.getElementById('n-obj').value||'Объект';
+  const desc=document.getElementById('n-desc').value||'Новый наряд';
+  const assignee=document.getElementById('n-assign').value;
+  const reason=document.getElementById('n-reason').value;
+  const sla=parseInt(document.getElementById('n-sla').value)||5;
+  const priority=document.getElementById('n-priority').value;
+  narads.unshift({id,title:desc,obj,status:priority,statusLabel:{critical:'Просрочен',pending:'Ожидание',review:'Проверка'}[priority]||'Ожидание',age:0,sla,assignee,reason,msgs:0,thread:[
+    {author:'Система',time:new Date().toTimeString().slice(0,5),text:`Наряд создан. SLA: ${sla}д. Исполнитель: ${assignee}. Причина: ${reason}`,type:'sys'}
+  ]});
+  hideModal(); renderTable(getCurrentData()); showToast('Наряд добавлен в очередь','success');
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))hideModal();});
+
+// NOTIFICATIONS
+function markAllRead(){ document.querySelectorAll('.notif-item.unread').forEach(x=>{x.classList.remove('unread','red','amber','green');}); showToast('Все уведомления прочитаны','success'); }
+
+// TOAST
+function showToast(msg,type){
+  const a=document.getElementById('toast-area'); const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  const icons={success:'ti-circle-check',warning:'ti-alert-triangle',error:'ti-alert-circle'};
+  t.innerHTML=`<i class="ti ${icons[type]||'ti-info-circle'}"></i>${msg}`;
+  a.appendChild(t); setTimeout(()=>t.remove(),3000);
+}
+
+// EXPORT
+function exportReport(){
+  const lines=['ОТЧЁТ ПО ЗАВИСШИМ НАРЯДАМ','='.repeat(40),''];
+  narads.forEach(n=>{ lines.push(`${n.id} | ${n.title} | ${n.obj} | ${n.status} | ${n.assignee} | ${n.age}/${n.sla}д`); });
+  lines.push('','Сформировано: '+new Date().toLocaleString('ru'));
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='narad-report.txt'; a.click();
+  showToast('Отчёт скачан','success');
+}
+
+// CHARTS
+let chartsRendered=false;
+function renderCharts(){
+  if(chartsRendered) return; chartsRendered=true;
+  const co={color:'rgba(255,255,255,0.55)',font:{family:'Inter',size:11}};
+  const gridColor='rgba(255,255,255,0.06)';
+  const def={plugins:{legend:{display:false}},scales:{x:{ticks:co,grid:{color:gridColor}},y:{ticks:co,grid:{color:gridColor}}},responsive:true,maintainAspectRatio:false};
+
+  new Chart(document.getElementById('chart-week'),{type:'bar',data:{
+    labels:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+    datasets:[
+      {label:'Открыто',data:[3,2,4,1,3,0,1],backgroundColor:'rgba(59,124,246,0.5)',borderRadius:4},
+      {label:'Закрыто',data:[2,3,2,3,4,1,0],backgroundColor:'rgba(52,201,127,0.5)',borderRadius:4},
+    ]
+  },options:{...def,plugins:{legend:{display:true,labels:{color:'rgba(255,255,255,0.5)',font:{size:10}}}}}});
+
+  new Chart(document.getElementById('chart-reasons'),{type:'doughnut',data:{
+    labels:['Нет материала','Согласование','Нет персонала','Техн. ограничение','Документы'],
+    datasets:[{data:[32,24,18,15,11],backgroundColor:['rgba(232,76,76,.7)','rgba(245,166,35,.7)','rgba(59,124,246,.7)','rgba(167,139,250,.7)','rgba(52,201,127,.7)'],borderWidth:0,hoverOffset:4}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'rgba(255,255,255,0.5)',font:{size:10},boxWidth:12}}}}});
+
+  new Chart(document.getElementById('chart-assignee'),{type:'bar',data:{
+    labels:['Сергей К.','Алина В.','Руслан Т.','Иван М.'],
+    datasets:[{data:[3.1,4.2,1.8,2.0],backgroundColor:['rgba(245,166,35,.6)','rgba(232,76,76,.6)','rgba(52,201,127,.6)','rgba(59,124,246,.6)'],borderRadius:4}]
+  },options:{...def,indexAxis:'y'}});
+
+  new Chart(document.getElementById('chart-objects'),{type:'radar',data:{
+    labels:['Блок А','Блок Б','ЦТП-3','Склад №2','Внешний'],
+    datasets:[
+      {label:'SLA %',data:[72,61,45,88,55],fill:true,backgroundColor:'rgba(59,124,246,.15)',borderColor:'rgba(59,124,246,.7)',pointBackgroundColor:'rgba(59,124,246,.9)',pointRadius:3},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,scales:{r:{ticks:{color:'rgba(255,255,255,0.4)',font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(255,255,255,0.08)'},pointLabels:{color:'rgba(255,255,255,0.5)',font:{size:10}}}},plugins:{legend:{display:false}}}});
+}
+
+// AI ASSISTANT
+const aiContext = () => {
+  const critical=narads.filter(x=>x.status==='critical');
+  const overSla=narads.filter(x=>x.age>x.sla);
+  return `Данные системы НарядТрекер:
+- Всего зависших нарядов: ${narads.length}
+- Критических: ${critical.length} (${critical.map(x=>x.id+' — '+x.title+', '+x.age+'д/'+x.sla+'д SLA, исполнитель: '+x.assignee).join('; ')})
+- SLA нарушено: ${overSla.length} нарядов
+- Топ причины зависания: Нет материала (32%), Ждёт согласования (24%), Нет персонала (18%)
+- Исполнители: Сергей К. (SLA 58%, 3.1д ср.), Алина В. (SLA 45%, 4.2д), Руслан Т. (SLA 88%, 1.8д), Иван М. (SLA 76%, 2.0д)
+- Среднее время закрытия: 2.4 дня. Цель SLA: 85%.
+Отвечай кратко и по делу на русском языке. Давай конкретные рекомендации.`;
+};
+
+async function aiSend(){
+  const inp=document.getElementById('ai-input'); const q=inp.value.trim(); if(!q) return;
+  inp.value=''; aiAsk(q);
+}
+
+async function aiAsk(q){
+  const msgs=document.getElementById('ai-msgs');
+  msgs.innerHTML+=`<div class="ai-msg user"><div class="ai-avatar ai-av-user">Вы</div><div class="ai-bubble user">${q}</div></div>`;
+  const loadId='load-'+Date.now();
+  msgs.innerHTML+=`<div class="ai-msg" id="${loadId}"><div class="ai-avatar ai-av-bot">AI</div><div class="ai-bubble loading">Анализирую данные нарядов...</div></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  document.getElementById('ai-sugs').style.display='none';
+  try {
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:'claude-sonnet-4-6',max_tokens:800,
+      system:aiContext(),
+      messages:[{role:'user',content:q}]
+    })});
+    const data=await resp.json();
+    const text=data.content?.[0]?.text||'Не удалось получить ответ.';
+    const el=document.getElementById(loadId);
+    if(el) el.innerHTML=`<div class="ai-avatar ai-av-bot">AI</div><div class="ai-bubble bot">${text.replace(/\n/g,'<br>')}</div>`;
+  } catch(e) {
+    const el=document.getElementById(loadId);
+    if(el) el.innerHTML=`<div class="ai-avatar ai-av-bot">AI</div><div class="ai-bubble bot" style="color:var(--red)">Ошибка подключения к AI. Проверьте доступ к API.</div>`;
+  }
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function askAiForNarad(id){
+  const n=narads.find(x=>x.id===id); if(!n) return;
+  goPage('ai',null,'tab-ai');
+  setTimeout(()=>aiAsk(`Наряд ${n.id}: "${n.title}" (${n.obj}), причина зависания: ${n.reason}, дней зависания: ${n.age} из ${n.sla} SLA. Что предпринять для скорейшего закрытия?`),100);
+}
+
+// REMINDER SIMULATION
+setTimeout(()=>{ showToast('⚠ Напоминание: НАР-2024-0201 просрочен уже 12 дней!','warning'); },4000);
+setTimeout(()=>{ showToast('Сергей К. ответил в НАР-2024-0187','success'); },8000);
+
+renderTable(getCurrentData());
+</script>
+</body>
+</html>
